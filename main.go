@@ -7,15 +7,22 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/ericchiang/k8s"
 	corev1 "github.com/ericchiang/k8s/apis/core/v1"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	fmt.Println(".: Kube Log Metrics")
 	LoadConfiguration()
+	http.Handle("/metrics", promhttp.Handler())
+	log.Fatal(http.ListenAndServe(strconv.Itoa(GetServerPort()), nil))
+}
 
+func publishPodsLogs() {
 	client, _ := k8s.NewInClusterClient()
 
 	var pods corev1.PodList
